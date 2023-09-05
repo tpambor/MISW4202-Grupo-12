@@ -2,10 +2,10 @@
 
 ## Integrantes
 
-Camilo Ramírez Restrepo
-Laura Daniela Molina Villar
-Leidy Viviana Osorio Jiménez
-Tim Ulf Pambor 
+- Camilo Ramírez Restrepo\
+- Laura Daniela Molina Villar
+- Leidy Viviana Osorio Jiménez
+- Tim Ulf Pambor 
 
 ## Propósito del experimento
 Evaluar la implementación de las tácticas Voting y Redundancia Pasiva en el microservicio Motor de Emparejamiento para la detección de errores y recuperación de dicho servicio.
