@@ -1,6 +1,7 @@
 # Experimento Arquitectura ABC Jobs
 
-##Integrantes
+## Integrantes
+
 Camilo Ramírez Restrepo
 Laura Daniela Molina Villar
 Leidy Viviana Osorio Jiménez
