@@ -10,10 +10,11 @@ import logging
 app = create_app('default')
 faker = Faker()
 INSTANCE_NAME = 'motor_emparejamiento_1'
-# logging.basicConfig(
-#     filename='logs/{}.log'.format(INSTANCE_NAME),
-#     level=logging.INFO,
-# )
+logging.basicConfig(
+    filename='logs/{}.log'.format(INSTANCE_NAME),
+    level=logging.INFO,
+)
+
 # Inicializar API
 api = Api(app)
 
@@ -47,12 +48,12 @@ class VistaCandidato(Resource):
             'numero': counter,
             'nombre': name,
             'veracidad': veridity,
-            'instancia': app.config['INSTANCE_NAME']
+            'instancia': INSTANCE_NAME
         }
         logging.info(json.dumps(logging_data))
 
         # Retorno de respuesta
-        return jsonify(response), 200
+        return response, 200
 
 
 # Agregar recurso a la API
