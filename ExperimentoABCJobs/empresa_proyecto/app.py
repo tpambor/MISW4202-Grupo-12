@@ -1,31 +1,37 @@
-
-from empresa_proyecto import create_app
+import threading
 from celery import Celery
-from cola_mensajes import search_best_candidates 
+from kombu import Exchange, Queue
 from time import sleep 
 
+celery_app = Celery(__name__, broker="redis://localhost:6379/0")
+celery_app.conf.task_queues = (
+    Queue('response', Exchange('response'), routing_key='best_candidates'),
+)
 
-app = create_app('default')
-app_context = app.app_context()
-app_context.push()
+class WorkerThread(object):
+    def __init__(self, celery_app):
+        self.celery_app = celery_app
+        self.worker = self.celery_app.Worker()
+        self.thread = threading.Thread(target=self.run, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
-@celery_app.task(name="response_best_candidates")
-def response_best_candidates(response):\
-   print(response)
+    def run(self):
+        self.worker.start()
 
-
-@celery_app.task(name="request_best_candidates", queue="request")
-def request_best_candidates(id_vacancy):
-    search_best_candidates.apply_async(args=[id_vacancy])
-
+@celery_app.task(name="response.best_candidates")
+def response_best_candidates(id_vacancy, final_candidate):
+    print("response")
 
 def publish_messages(num_messages):
+    app = Celery(__name__, broker="redis://localhost:6379/0")
     for index in range(1, num_messages + 1):
         args = (index,)
-        request_best_candidates.apply_async(args)
+        app.send_task("request.best_candidates", args, queue="request")
         print(f"Enviada solicitud {index} a la cola de mensajes.")
         sleep(1)  
 
 if __name__ == "__main__":
+    WorkerThread(celery_app)
     num_messages = 1000  
     publish_messages(num_messages)

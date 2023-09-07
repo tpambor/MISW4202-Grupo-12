@@ -1,11 +1,11 @@
 from celery import Celery
+from kombu import Exchange, Queue
 import requests
 
 celery_app = Celery(__name__, broker="redis://localhost:6379/0")
-
-@celery_app.task(name="response_best_candidates", queue="response")
-def response_best_candidates(id_vacancy, final_candidate):
-   pass
+celery_app.conf.task_queues = (
+    Queue('request', Exchange('request'), routing_key='best_candidates'),
+)
 
 nombre_archivo = "errores_detectados.txt"
 
@@ -51,7 +51,7 @@ def compare_and_save(responses, id_vacancy):
 
 
    
-@celery_app.task(name="request_best_candidates", queue="request")
+@celery_app.task(name="request.best_candidates")
 def request_best_candidates(id_vacancy):
 #   response_instance_1 = requests.get('"http://monitor-1:5000')
 #   response_instance_2 = requests.get('"http://monitor-2:5000')
@@ -69,7 +69,7 @@ def request_best_candidates(id_vacancy):
     final_candidate = compare_and_save([response_instance_1['nombre'], response_instance_2['nombre'], response_instance_3['nombre']], str(id_vacancy))
     args = (id_vacancy, final_candidate)
     print('Se envia el resultado para la vacante {}'.format(id_vacancy) )
-    response_best_candidates.apply_async(args=args, queue="response")
+    celery_app.send_task("response.best_candidates", args=args, queue="response")
 
 
 
