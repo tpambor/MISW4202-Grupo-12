@@ -16,7 +16,7 @@ def response_best_candidates(response):
 @celery_app.task(name="registrar_log")
 def registrar_log(id_vacancy, best_candidate):
     with open("log_signin.txt", "a+") as file:
-        file.write("Para la vacantye {}, el mejor candidato es: {}\n".format(id_vacancy, id_vacancy))
+        file.write("Para la vacante {}, el mejor candidato es: {}\n".format(id_vacancy, id_vacancy))
 
 @celery_app.task(name="request_best_candidates")
 def request_best_candidates(id_vacancy):
