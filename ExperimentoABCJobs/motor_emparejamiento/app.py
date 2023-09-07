@@ -4,16 +4,16 @@ from flask_restful import Api, Resource
 import requests
 import json
 from faker import Faker
-import logging
+# import logging
 
 # Configuración de la App
 app = create_app('default')
 faker = Faker()
 INSTANCE_NAME = 'motor_emparejamiento_1'
-logging.basicConfig(
-    filename='logs/{}.log'.format(INSTANCE_NAME),
-    level=logging.INFO,
-)
+# logging.basicConfig(
+#     filename='logs/{}.log'.format(INSTANCE_NAME),
+#     level=logging.INFO,
+# )
 
 # Inicializar API
 api = Api(app)
@@ -50,7 +50,11 @@ class VistaCandidato(Resource):
             'veracidad': veridity,
             'instancia': INSTANCE_NAME
         }
-        logging.info(json.dumps(logging_data))
+        # logging.info(json.dumps(logging_data))
+        # Escribir los datos de registro en un archivo de texto
+        with open('logs/{}.txt'.format(INSTANCE_NAME), 'a') as file:
+            file.write(json.dumps(logging_data) + '\n')
+
 
         # Retorno de respuesta
         return response, 200
