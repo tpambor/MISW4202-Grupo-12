@@ -38,7 +38,7 @@ class VistaCandidato(Resource):
             'nombre': name,
         }
 
-        # print("Llega petición para vacante ", id_vacante, " nombre ", name)
+        print("Llega petición para vacante ", id_vacante, " nombre ", name)
 
         # Log
         logging_data = {
