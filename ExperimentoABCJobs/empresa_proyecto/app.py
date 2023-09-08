@@ -8,6 +8,7 @@ celery_app.conf.task_queues = (
     Queue('response', Exchange('response'), routing_key='best_candidates'),
 )
 
+nombre_archivo = "mejores_candidatos.txt"
 class WorkerThread(object):
     def __init__(self, celery_app):
         self.celery_app = celery_app
@@ -21,7 +22,8 @@ class WorkerThread(object):
 
 @celery_app.task(name="response.best_candidates")
 def response_best_candidates(id_vacancy, final_candidate):
-    print("response")
+    with open(nombre_archivo, "a+") as file:
+            file.write('El mejor candidato para la vacante {} es {}\n'.format(id_vacancy, final_candidate))
 
 def publish_messages(num_messages):
     app = Celery(__name__, broker="redis://localhost:6379/0")
@@ -33,5 +35,5 @@ def publish_messages(num_messages):
 
 if __name__ == "__main__":
     WorkerThread(celery_app)
-    num_messages = 1000  
+    num_messages = 3  
     publish_messages(num_messages)
