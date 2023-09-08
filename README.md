@@ -28,3 +28,10 @@ Punto de sensibilidad que se desean probar: Uso de Cola de mensajes para la comu
 Se estima que el experimento requerirá alrededor de 48 horas (12 horas/hombre) con un sprint de una semana, para la configuración, desarrollo, pruebas y análisis de resultados. 
 
 
+# Comandos para poder ejecutar el proyecto:
+- Correr flask run dentro de motor_emparejamiento
+- Correr celery -A tasks worker -l info -Q request  dentro de voting
+- Correr celery -A app  worker -l info -Q response  dentro de empresa_proyecto
+- Correr python3 app.py  dentro de empresa_proyecto
+
+- 
