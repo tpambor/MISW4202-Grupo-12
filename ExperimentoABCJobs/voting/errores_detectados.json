@@ -1,0 +1,46 @@
+[
+    {
+        "id_vacante": "1",
+        "instancia": "motor_emparejamiento_3"
+    },
+    {
+        "id_vacante": "2",
+        "instancia": "motor_emparejamiento_2"
+    },
+    {
+        "id_vacante": "3",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": "3",
+        "instancia": "motor_emparejamiento_2"
+    },
+    {
+        "id_vacante": "3",
+        "instancia": "motor_emparejamiento_3"
+    },
+    {
+        "id_vacante": "6",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": "6",
+        "instancia": "motor_emparejamiento_2"
+    },
+    {
+        "id_vacante": "6",
+        "instancia": "motor_emparejamiento_3"
+    },
+    {
+        "id_vacante": "10",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": "10",
+        "instancia": "motor_emparejamiento_2"
+    },
+    {
+        "id_vacante": "10",
+        "instancia": "motor_emparejamiento_3"
+    }
+]

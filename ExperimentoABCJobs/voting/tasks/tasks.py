@@ -1,16 +1,24 @@
 from celery import Celery
 from kombu import Exchange, Queue
 import requests
+import json
+
 
 celery_app = Celery(__name__, broker="redis://localhost:6379/0")
 celery_app.conf.task_queues = (
     Queue('request', Exchange('request'), routing_key='best_candidates'),
 )
 
-nombre_archivo = "errores_detectados.txt"
+nombre_archivo = "errores_detectados.json"
 
 def compare_and_save(responses, id_vacancy):
-    errorDetectadoMsg = 'Error detectado en la instancia '
+
+    try:
+        with open(nombre_archivo, "r") as archivo_existente:
+            errores = json.load(archivo_existente)
+    except FileNotFoundError:
+        # Si el archivo no existe, se crea con un arreglo vacío
+        errores = []
 
     # Todos los valores son iguales
     if responses[0] == responses[1] == responses[2]:   
@@ -19,10 +27,18 @@ def compare_and_save(responses, id_vacancy):
     # Todos los valores son diferentes:
     # - Se devuelve un mensaje de error
     # - Se agregan todas las instancias como errores detectados
-    elif responses[0] != responses[1] != responses[2]:
+    elif len(responses) == len(set(responses)):
         for index in range(1, 4):
-            with open(nombre_archivo, "a+") as file:
-                file.write(errorDetectadoMsg + index + ' para la vacante ' + id_vacancy + '\n')
+            nuevo_error = {
+                "id_vacante": id_vacancy,
+                "instancia": "motor_emparejamiento_" + str(index)
+            }
+
+            errores.append(nuevo_error)
+
+            with open(nombre_archivo, "w") as archivo:
+                json.dump(errores, archivo, indent=4)
+
         return 'No se pudo determinar el mejor candidato'
     
     # Solo un valor es diferente:
@@ -44,8 +60,16 @@ def compare_and_save(responses, id_vacancy):
             instance = '1'
             most_common = responses[1]
 
-        with open(nombre_archivo, "a+") as file:
-            file.write(errorDetectadoMsg + instance + ' para la vacante ' + id_vacancy + '\n')
+        nuevo_error = {
+            "id_vacante": id_vacancy,
+            "instancia": "motor_emparejamiento_" + instance
+        }
+
+        errores.append(nuevo_error)
+  
+
+        with open(nombre_archivo, "w") as archivo:
+            json.dump(errores, archivo, indent=4)
 
         return most_common
 
@@ -53,19 +77,19 @@ def compare_and_save(responses, id_vacancy):
    
 @celery_app.task(name="request.best_candidates")
 def request_best_candidates(id_vacancy):
-#   response_instance_1 = requests.get('"http://monitor-1:5000')
-#   response_instance_2 = requests.get('"http://monitor-2:5000')
-#   response_instance_3 = requests.get('"http://monitor-3:5000')
     print('Se empieza el calculo para la vacante {}'.format(id_vacancy))
-    response_instance_1 = {
-        'nombre': 'Pepe'
-    }
-    response_instance_2 = {
-        'nombre': 'Pepe'
-    }
-    response_instance_3 = {
-        'nombre': 'Jose'
-    }
+    response_instance_1 = requests.get('http://127.0.0.1:5000/candidato/{}'.format(id_vacancy)).json()
+    response_instance_2 = requests.get('http://127.0.0.1:5000/candidato/{}'.format(id_vacancy)).json()
+    response_instance_3 = requests.get('http://127.0.0.1:5000/candidato/{}'.format(id_vacancy)).json()
+    # response_instance_1 = {
+    #     'nombre': 'Maria'
+    # }
+    # response_instance_2 = {
+    #     'nombre': 'Pepe'
+    # }
+    # response_instance_3 = {
+    #     'nombre': 'Pepe'
+    # }
     final_candidate = compare_and_save([response_instance_1['nombre'], response_instance_2['nombre'], response_instance_3['nombre']], str(id_vacancy))
     args = (id_vacancy, final_candidate)
     print('Se envia el resultado para la vacante {}'.format(id_vacancy) )

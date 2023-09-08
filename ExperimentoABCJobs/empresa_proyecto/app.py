@@ -35,5 +35,5 @@ def publish_messages(num_messages):
 
 if __name__ == "__main__":
     WorkerThread(celery_app)
-    num_messages = 3  
+    num_messages = 10  
     publish_messages(num_messages)

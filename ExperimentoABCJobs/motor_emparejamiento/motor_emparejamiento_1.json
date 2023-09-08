@@ -1,0 +1,52 @@
+[
+    {
+        "id_vacante": 1,
+        "nombre": "Abigail Salinas",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 2,
+        "nombre": "Julian Peterson",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 3,
+        "nombre": "Kevin Jensen",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 3,
+        "nombre": "Eric Garcia",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 3,
+        "nombre": "Matthew Scott",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 6,
+        "nombre": "Katherine Rollins",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 6,
+        "nombre": "Angelica Wright",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 10,
+        "nombre": "Christopher Cook",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 10,
+        "nombre": "Kyle Thompson",
+        "instancia": "motor_emparejamiento_1"
+    },
+    {
+        "id_vacante": 10,
+        "nombre": "Steve Dean",
+        "instancia": "motor_emparejamiento_1"
+    }
+]
