@@ -1,7 +1,7 @@
 from motor_emparejamiento import create_app
 from flask_restful import Api, Resource
-import json
 from faker import Faker
+import csv
 
 
 # Configuración de la App
@@ -26,7 +26,7 @@ class VistaCandidato(Resource):
         random = faker.random_int(min=0, max=100)
 
         # Generación de datos
-        if random < 75:
+        if random < 90:
             name = 'Don Octavio Mesa'
             veridity = True
         else:
@@ -43,16 +43,25 @@ class VistaCandidato(Resource):
         # Log
         logging_data = {
             'id_vacante': id_vacante,
-            'nombre': name,
+            'candidato_erroneo': name,
             'instancia': INSTANCE_NAME
         }
 
-        nombre_archivo = '{}.txt'.format(INSTANCE_NAME)
+        nombre_archivo = '{}.csv'.format(INSTANCE_NAME)
 
         if veridity == False:
-            with open(nombre_archivo, "a+") as archivo:
-                json.dump(logging_data, archivo)
-                archivo.write('\n')
+            with open(nombre_archivo, "a+", newline='') as archivo_csv:
+                fieldnames = ['id_vacante', 'candidato_erroneo', 'instancia']
+
+                # Crear el escritor CSV
+                csv_writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
+
+                # Si el archivo está vacío, escribir la cabecera
+                if archivo_csv.tell() == 0:
+                    csv_writer.writeheader()
+
+                # Escribir el registro
+                csv_writer.writerow(logging_data)
 
 
         # Retorno de respuesta

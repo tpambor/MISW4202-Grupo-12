@@ -1,16 +1,14 @@
 from celery import Celery
 from kombu import Exchange, Queue
 import requests
-import json
-
-
+import csv
 
 celery_app = Celery(__name__, broker="redis://localhost:6379/0")
 celery_app.conf.task_queues = (
     Queue('request', Exchange('request'), routing_key='best_candidates'),
 )
 
-nombre_archivo = "errores_detectados.txt"
+nombre_archivo = "errores_detectados.csv"
 
 def compare_and_save(responses, id_vacancy):
 
@@ -24,13 +22,23 @@ def compare_and_save(responses, id_vacancy):
     elif len(responses) == len(set(responses)):
         for index in range(1, 4):
             nuevo_error = {
-                "id_vacante": index,
+                "id_vacante": id_vacancy,
+                "candidato_erroneo": responses[index - 1],
                 "instancia": "motor_emparejamiento_" + str(index)
             }
 
-            with open(nombre_archivo, "a+") as archivo:
-                json.dump(nuevo_error, archivo)
-                archivo.write('\n')
+            with open(nombre_archivo, "a+", newline='') as archivo_csv:
+                fieldnames = ['id_vacante', "candidato_erroneo", 'instancia']
+
+                # Crear el escritor CSV
+                csv_writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
+
+                # Si el archivo está vacío, escribir la cabecera
+                if archivo_csv.tell() == 0:
+                    csv_writer.writeheader()
+
+                # Escribir el registro
+                csv_writer.writerow(nuevo_error)
 
         return 'No se pudo determinar el mejor candidato'
     
@@ -40,28 +48,41 @@ def compare_and_save(responses, id_vacancy):
     else:
         most_common = None
         instance = None
+        error_name = None
 
         if responses[0] == responses[1] != responses[2]:
             instance = '3'
             most_common = responses[0]
+            error_name = responses[2]
 
         if responses[0] == responses[2] != responses[1]:
             instance = '2'
             most_common = responses[0]
+            error_name = responses[1]
             
         if responses[1] == responses[2] != responses[0]:
             instance = '1'
             most_common = responses[1]
+            error_name = responses[0]
 
         nuevo_error = {
             "id_vacante": id_vacancy,
+            "candidato_erroneo": error_name,
             "instancia": "motor_emparejamiento_" + instance
         }
 
+        with open(nombre_archivo, "a+", newline='') as archivo_csv:
+            fieldnames = ['id_vacante', 'candidato_erroneo', 'instancia']
 
-        with open(nombre_archivo, "a+") as archivo:
-            json.dump(nuevo_error, archivo)
-            archivo.write('\n')
+            # Crear el escritor CSV
+            csv_writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
+
+            # Si el archivo está vacío, escribir la cabecera
+            if archivo_csv.tell() == 0:
+                csv_writer.writeheader()
+
+            # Escribir el registro
+            csv_writer.writerow(nuevo_error)
 
         return most_common
 
