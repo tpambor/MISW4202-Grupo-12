@@ -1,0 +1,46 @@
+services:
+  redis:
+    image: redis:latest
+  empresa_proyecto:
+    build: empresa_proyecto
+    environment:
+      - BROKER=redis://redis:6379/0
+      - LOGFILE=/logs/empresa_proyecto.csv
+      - NUM_MESSAGES=100
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /logs
+  voting:
+    build: voting
+    environment:
+      - BROKER=redis://redis:6379/0
+      - LOGFILE=/logs/voting.csv
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /logs
+  motor_emparejamiento_1:
+    build: motor_emparejamiento
+    environment:
+      - LOGFILE=/logs/motor_emparejamiento_1.csv
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /logs
+  motor_emparejamiento_2:
+    build: motor_emparejamiento
+    environment:
+      - LOGFILE=/logs/motor_emparejamiento_2.csv
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /logs
+  motor_emparejamiento_3:
+    build: motor_emparejamiento
+    environment:
+      - LOGFILE=/logs/motor_emparejamiento_3.csv
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /logs

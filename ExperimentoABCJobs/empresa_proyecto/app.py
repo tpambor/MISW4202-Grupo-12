@@ -1,11 +1,13 @@
 import threading
-from time import sleep 
 import csv
+import os
+from time import sleep 
 from celery import Celery
 from kombu import Exchange, Queue
 
-NOMBRE_ARCHIVO = "mejores_candidatos.csv"
-BROKER = "redis://localhost:6379/0"
+NOMBRE_ARCHIVO = os.getenv('LOGFILE') or "mejores_candidatos.csv"
+BROKER = os.getenv('BROKER') or "redis://localhost:6379/0"
+NUM_MESSAGES = int(os.getenv('NUM_MESSAGES') or 1000)
 
 celery_app = Celery(__name__, broker=BROKER)
 celery_app.conf.task_queues = (
@@ -56,6 +58,6 @@ def publish_messages(num_messages):
 
 if __name__ == "__main__":
     WorkerThread(celery_app)
-    num_messages = 1000
-    publish_messages(num_messages)
+    sleep(10)
+    publish_messages(NUM_MESSAGES)
     sleep(10)

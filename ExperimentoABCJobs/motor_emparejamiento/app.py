@@ -1,27 +1,21 @@
-from motor_emparejamiento import create_app
+from flask import Flask
 from flask_restful import Api, Resource
 from faker import Faker
 import csv
+import os
 
+NOMBRE_ARCHIVO = os.getenv('LOGFILE') or "motor_emparejamiento.csv"
 
 # Configuración de la App
-app = create_app('default')
+app = Flask(__name__)
 faker = Faker()
-INSTANCE_NAME = 'motor_emparejamiento_1'
 
 # Inicializar API
 api = Api(app)
 
 # Vista
-counter = 0
-
-
 class VistaCandidato(Resource):
     def get(self, id_vacante):
-        
-        global counter
-        counter += 1
-
         # Valor random para generar dato veridico o no
         random = faker.random_int(min=0, max=100)
 
@@ -43,15 +37,12 @@ class VistaCandidato(Resource):
         # Log
         logging_data = {
             'id_vacante': id_vacante,
-            'candidato_erroneo': name,
-            'instancia': INSTANCE_NAME
+            'candidato_erroneo': name
         }
 
-        nombre_archivo = '{}.csv'.format(INSTANCE_NAME)
-
         if veridity == False:
-            with open(nombre_archivo, "a+", newline='') as archivo_csv:
-                fieldnames = ['id_vacante', 'candidato_erroneo', 'instancia']
+            with open(NOMBRE_ARCHIVO, "a+", newline='') as archivo_csv:
+                fieldnames = ['id_vacante', 'candidato_erroneo']
 
                 # Crear el escritor CSV
                 csv_writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
@@ -62,7 +53,6 @@ class VistaCandidato(Resource):
 
                 # Escribir el registro
                 csv_writer.writerow(logging_data)
-
 
         # Retorno de respuesta
         return response, 200

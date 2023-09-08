@@ -2,16 +2,17 @@ from celery import Celery
 from kombu import Exchange, Queue
 import requests
 import csv
+import os
 
-celery_app = Celery(__name__, broker="redis://localhost:6379/0")
+BROKER = os.getenv('BROKER') or "redis://localhost:6379/0"
+NOMBRE_ARCHIVO = os.getenv('LOGFILE') or "errores_detectados.csv"
+
+celery_app = Celery(__name__, broker=BROKER)
 celery_app.conf.task_queues = (
     Queue('request', Exchange('request'), routing_key='best_candidates'),
 )
 
-nombre_archivo = "errores_detectados.csv"
-
 def compare_and_save(responses, id_vacancy):
-
     # Todos los valores son iguales
     if responses[0] == responses[1] == responses[2]:   
         return responses[0]
@@ -27,7 +28,7 @@ def compare_and_save(responses, id_vacancy):
                 "instancia": "motor_emparejamiento_" + str(index)
             }
 
-            with open(nombre_archivo, "a+", newline='') as archivo_csv:
+            with open(NOMBRE_ARCHIVO, "a+", newline='') as archivo_csv:
                 fieldnames = ['id_vacante', "candidato_erroneo", 'instancia']
 
                 # Crear el escritor CSV
@@ -71,7 +72,7 @@ def compare_and_save(responses, id_vacancy):
             "instancia": "motor_emparejamiento_" + instance
         }
 
-        with open(nombre_archivo, "a+", newline='') as archivo_csv:
+        with open(NOMBRE_ARCHIVO, "a+", newline='') as archivo_csv:
             fieldnames = ['id_vacante', 'candidato_erroneo', 'instancia']
 
             # Crear el escritor CSV
@@ -91,9 +92,9 @@ def compare_and_save(responses, id_vacancy):
 @celery_app.task(name="request.best_candidates")
 def request_best_candidates(id_vacancy):
     print('Se empieza el calculo para la vacante {}'.format(id_vacancy))
-    response_instance_1 = requests.get('http://127.0.0.1:5000/candidato/{}'.format(id_vacancy)).json()
-    response_instance_2 = requests.get('http://127.0.0.1:5000/candidato/{}'.format(id_vacancy)).json()
-    response_instance_3 = requests.get('http://127.0.0.1:5000/candidato/{}'.format(id_vacancy)).json()
+    response_instance_1 = requests.get('http://motor_emparejamiento_1:5000/candidato/{}'.format(id_vacancy)).json()
+    response_instance_2 = requests.get('http://motor_emparejamiento_2:5000/candidato/{}'.format(id_vacancy)).json()
+    response_instance_3 = requests.get('http://motor_emparejamiento_3:5000/candidato/{}'.format(id_vacancy)).json()
     # response_instance_1 = {
     #     'nombre': 'Maria'
     # }
@@ -107,6 +108,3 @@ def request_best_candidates(id_vacancy):
     args = (id_vacancy, final_candidate)
     print('Se envia el resultado para la vacante {}'.format(id_vacancy) )
     celery_app.send_task("response.best_candidates", args=args, queue="response")
-
-
-
