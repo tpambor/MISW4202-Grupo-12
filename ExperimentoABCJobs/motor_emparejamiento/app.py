@@ -47,21 +47,12 @@ class VistaCandidato(Resource):
             'instancia': INSTANCE_NAME
         }
 
-        nombre_archivo = '{}.json'.format(INSTANCE_NAME)
-
-        try:
-            with open(nombre_archivo, "r") as archivo_existente:
-                errores = json.load(archivo_existente)
-        except FileNotFoundError:
-            # Si el archivo no existe, se crea con un arreglo vacío
-            errores = []
+        nombre_archivo = '{}.txt'.format(INSTANCE_NAME)
 
         if veridity == False:
-            # Escribir los datos de registro en un archivo de texto
-            errores.append(logging_data)
-
-            with open(nombre_archivo, "w") as archivo:
-                json.dump(errores, archivo, indent=4)
+            with open(nombre_archivo, "a+") as archivo:
+                json.dump(logging_data, archivo)
+                archivo.write('\n')
 
 
         # Retorno de respuesta

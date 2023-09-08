@@ -10,16 +10,6 @@ celery_app.conf.task_queues = (
 
 nombre_archivo = "mejores_candidatos.txt"
 
-# class WorkerThread(object):
-#     def __init__(self, celery_app):
-#         self.celery_app = celery_app
-#         self.worker = self.celery_app.Worker()
-#         self.thread = threading.Thread(target=self.run, args=())
-#         self.thread.daemon = True
-#         self.thread.start()
-
-#     def run(self):
-#         self.worker.start()
 
 @celery_app.task(name="response.best_candidates")
 def response_best_candidates(id_vacancy, final_candidate):
@@ -32,9 +22,7 @@ def publish_messages(num_messages):
         args = (index,)
         celery_app.send_task("request.best_candidates", args, queue="request")
         print(f"Enviada solicitud {index} a la cola de mensajes.")
-        sleep(1)  
 
 if __name__ == "__main__":
-    # WorkerThread(celery_app)
-    num_messages = 10  
+    num_messages = 100
     publish_messages(num_messages)

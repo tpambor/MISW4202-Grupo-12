@@ -4,21 +4,15 @@ import requests
 import json
 
 
+
 celery_app = Celery(__name__, broker="redis://localhost:6379/0")
 celery_app.conf.task_queues = (
     Queue('request', Exchange('request'), routing_key='best_candidates'),
 )
 
-nombre_archivo = "errores_detectados.json"
+nombre_archivo = "errores_detectados.txt"
 
 def compare_and_save(responses, id_vacancy):
-
-    try:
-        with open(nombre_archivo, "r") as archivo_existente:
-            errores = json.load(archivo_existente)
-    except FileNotFoundError:
-        # Si el archivo no existe, se crea con un arreglo vacío
-        errores = []
 
     # Todos los valores son iguales
     if responses[0] == responses[1] == responses[2]:   
@@ -30,14 +24,13 @@ def compare_and_save(responses, id_vacancy):
     elif len(responses) == len(set(responses)):
         for index in range(1, 4):
             nuevo_error = {
-                "id_vacante": id_vacancy,
+                "id_vacante": index,
                 "instancia": "motor_emparejamiento_" + str(index)
             }
 
-            errores.append(nuevo_error)
-
-            with open(nombre_archivo, "w") as archivo:
-                json.dump(errores, archivo, indent=4)
+            with open(nombre_archivo, "a+") as archivo:
+                json.dump(nuevo_error, archivo)
+                archivo.write('\n')
 
         return 'No se pudo determinar el mejor candidato'
     
@@ -65,11 +58,10 @@ def compare_and_save(responses, id_vacancy):
             "instancia": "motor_emparejamiento_" + instance
         }
 
-        errores.append(nuevo_error)
-  
 
-        with open(nombre_archivo, "w") as archivo:
-            json.dump(errores, archivo, indent=4)
+        with open(nombre_archivo, "a+") as archivo:
+            json.dump(nuevo_error, archivo)
+            archivo.write('\n')
 
         return most_common
 
@@ -90,7 +82,7 @@ def request_best_candidates(id_vacancy):
     # response_instance_3 = {
     #     'nombre': 'Pepe'
     # }
-    final_candidate = compare_and_save([response_instance_1['nombre'], response_instance_2['nombre'], response_instance_3['nombre']], str(id_vacancy))
+    final_candidate = compare_and_save([response_instance_1['nombre'], response_instance_2['nombre'], response_instance_3['nombre']], id_vacancy)
     args = (id_vacancy, final_candidate)
     print('Se envia el resultado para la vacante {}'.format(id_vacancy) )
     celery_app.send_task("response.best_candidates", args=args, queue="response")
