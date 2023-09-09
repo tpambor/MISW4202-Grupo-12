@@ -2,14 +2,14 @@
 
 ## Integrantes
 
-- Camilo Ramírez Restrepo\
+- Camilo Ramírez Restrepo
 - Laura Daniela Molina Villar
 - Leidy Viviana Osorio Jiménez
 - Tim Ulf Pambor 
 
 # Comandos para poder ejecutar el experimento:
 - Ejecutar el experimento
-  - Instalar Docker y Docker Compose si sea necesario
+  - Instalar Docker y Docker Compose
   - Ejecuta `docker compose up --renew-anon-volumes --abort-on-container-exit --force-recreate` dentro de la carpeta ExperimentoABCJobs
   - Nota: Se puede configurar el número de peticiones con `NUM_MESSAGES=1000` dentro del archivo `compose.yaml`
 - Analizar los resultados
