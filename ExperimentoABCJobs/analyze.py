@@ -8,21 +8,21 @@ motor_1_producido = set()
 motor_2_producido = set()
 motor_3_producido = set()
 
-with open('evidencia/run3/voting.csv', newline='') as csvfile:
+with open('logs/voting.csv', newline='') as csvfile:
     data = csv.DictReader(csvfile)
     voting = [*data]
 
-with open('evidencia/run3/motor_emparejamiento_1.csv', newline='') as csvfile:
+with open('logs/motor_emparejamiento_1.csv', newline='') as csvfile:
     data = csv.DictReader(csvfile)
     for row in data:
         motor_1_producido.add(int(row['id_vacante']))
 
-with open('evidencia/run3/motor_emparejamiento_2.csv', newline='') as csvfile:
+with open('logs/motor_emparejamiento_2.csv', newline='') as csvfile:
     data = csv.DictReader(csvfile)
     for row in data:
         motor_2_producido.add(int(row['id_vacante']))
 
-with open('evidencia/run3/motor_emparejamiento_3.csv', newline='') as csvfile:
+with open('logs/motor_emparejamiento_3.csv', newline='') as csvfile:
     data = csv.DictReader(csvfile)
     for row in data:
         motor_3_producido.add(int(row['id_vacante']))

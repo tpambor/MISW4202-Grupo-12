@@ -7,6 +7,16 @@
 - Leidy Viviana Osorio Jiménez
 - Tim Ulf Pambor 
 
+# Comandos para poder ejecutar el experimento:
+- Ejecutar el experimento
+  - Instalar Docker y Docker Compose si sea necesario
+  - Ejecuta `docker compose up --renew-anon-volumes --abort-on-container-exit --force-recreate` dentro de la carpeta ExperimentoABCJobs
+  - Nota: Se puede configurar el número de peticiones con `NUM_MESSAGES=1000` dentro del archivo `compose.yaml`
+- Analizar los resultados
+  - Instalar Python 3
+  - Ejecuta `python3 analyze.py` dentro de la carpeta ExperimentoABCJobs
+
+
 ## Propósito del experimento
 Evaluar la implementación de las tácticas Voting y Redundancia Pasiva en el microservicio Motor de Emparejamiento para la detección de errores y recuperación de dicho servicio.
 
@@ -26,5 +36,3 @@ Punto de sensibilidad que se desean probar: Uso de Cola de mensajes para la comu
 
 ## Esfuerzo estimado
 Se estima que el experimento requerirá alrededor de 48 horas (12 horas/hombre) con un sprint de una semana, para la configuración, desarrollo, pruebas y análisis de resultados. 
-
-
