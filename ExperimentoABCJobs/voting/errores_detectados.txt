@@ -1,8 +1,0 @@
-Error detectado en la instancia 3 para la vacante 1
-Error detectado en la instancia 3 para la vacante 2
-Error detectado en la instancia 3 para la vacante 3
-Error detectado en la instancia 3 para la vacante 4
-Error detectado en la instancia 3 para la vacante 1
-Error detectado en la instancia 3 para la vacante 3
-Error detectado en la instancia 3 para la vacante 2
-Error detectado en la instancia 3 para la vacante 4

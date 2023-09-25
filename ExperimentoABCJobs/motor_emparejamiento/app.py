@@ -1,31 +1,26 @@
-from motor_emparejamiento import create_app
+from flask import Flask
 from flask_restful import Api, Resource
-import json
 from faker import Faker
+import csv
+import os
 
+NOMBRE_ARCHIVO = os.getenv('LOGFILE') or "motor_emparejamiento.csv"
 
 # Configuración de la App
-app = create_app('default')
+app = Flask(__name__)
 faker = Faker()
-INSTANCE_NAME = 'motor_emparejamiento_1'
 
 # Inicializar API
 api = Api(app)
 
 # Vista
-counter = 0
-
-
 class VistaCandidato(Resource):
-    def get(self):
-        global counter
-        counter += 1
-
+    def get(self, id_vacante):
         # Valor random para generar dato veridico o no
         random = faker.random_int(min=0, max=100)
 
         # Generación de datos
-        if random < 75:
+        if random < 90:
             name = 'Don Octavio Mesa'
             veridity = True
         else:
@@ -37,22 +32,31 @@ class VistaCandidato(Resource):
             'nombre': name,
         }
 
+        print("Llega petición para vacante ", id_vacante, " nombre ", name)
+
         # Log
         logging_data = {
-            'numero': counter,
-            'nombre': name,
-            'veracidad': veridity,
-            'instancia': INSTANCE_NAME
+            'id_vacante': id_vacante,
+            'candidato_erroneo': name
         }
 
-        # Escribir los datos de registro en un archivo de texto
-        with open('logs/{}.txt'.format(INSTANCE_NAME), 'a') as file:
-            file.write(json.dumps(logging_data) + '\n')
+        if veridity == False:
+            with open(NOMBRE_ARCHIVO, "a+", newline='') as archivo_csv:
+                fieldnames = ['id_vacante', 'candidato_erroneo']
 
+                # Crear el escritor CSV
+                csv_writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
+
+                # Si el archivo está vacío, escribir la cabecera
+                if archivo_csv.tell() == 0:
+                    csv_writer.writeheader()
+
+                # Escribir el registro
+                csv_writer.writerow(logging_data)
 
         # Retorno de respuesta
         return response, 200
 
 
 # Agregar recurso a la API
-api.add_resource(VistaCandidato, '/candidato')
+api.add_resource(VistaCandidato, '/candidato/<int:id_vacante>')
