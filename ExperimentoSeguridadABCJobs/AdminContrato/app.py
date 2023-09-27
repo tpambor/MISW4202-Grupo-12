@@ -1,13 +1,18 @@
-from flask_restful import  Api
-from flask import Flask, request, jsonify
-import re
-import jwt
+from flask import Flask
+from flask.views import MethodView
+from flask_smorest import Api, Blueprint, abort
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt
+from marshmallow import Schema, fields
 
-app = Flask(__name__)  
-app_context = app.app_context()
-app_context.push()
+JWT_PUBLIC_KEY = (
+    "-----BEGIN PUBLIC KEY-----\n"
+    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+nGNooPLSTnPcXHGwEp8Igz5cuCl\n"
+    "Wew8RPmYwxwqiAlAemdK8v0r3Z8IOWVq8289nlXXcN5OsLyoFxGo568XtQ==\n"
+    "-----END PUBLIC KEY-----"
+)
 
-api = Api(app)
+class ContratoSchema(Schema):
+    terminos = fields.String()
 
 # Diccionario de datos con contratos y usuarios
 contratos = [
@@ -21,36 +26,49 @@ contratos = [
     {"contratoId": 4, "userId": "aspirante_4"},
 ]
 
-clave_secreta = "secret"
+class AdminContratoApi(Api):
+    DEFAULT_ERROR_RESPONSE_NAME = None
 
-@app.route('/contrato/<int:contrato_id>', methods=['PUT'])
-def editar_contrato(contrato_id):
-    contrato = next((c for c in contratos if c['contratoId'] == contrato_id), None)
-    
-    if contrato is None:
-        return jsonify({"error": "Contrato no encontrado"}), 404
-    
-    tokenRequest = request.json["token"]
-    token = tokenRequest.get(token)
-    
-    try:
-    # Verificar y decodificar el token
-        payload = jwt.decode(token, clave_secreta, algorithms=["HS256"])
-        usuario = payload.get('usuario')
+blp = Blueprint("Contratos", __name__, description="API para gestionar contratos")
+
+@blp.route('/contrato/<int:contrato_id>')
+class VistaContrato(MethodView):
+    @jwt_required()
+    @blp.arguments(ContratoSchema())
+    @blp.response(200)
+    def put(self, nuevo_contrato, contrato_id):
+        contrato = next((c for c in contratos if c['contratoId'] == contrato_id), None)
+
+        if contrato is None:
+            abort(404, message='Contrato no encontrado')
+
+        token = get_jwt()
+        usuario = token['sub']
         print("usuario:", usuario)
-    except jwt.InvalidTokenError:
-        print("El token no es válido.")
-        
-    if not usuario.startswith("empleado_"):
-        return jsonify({"error": "El usuario no es un empleado"}), 403
-    
-    print(contrato['contratoId'])
-    print(usuario[len("empleado_")])
-    if str(contrato['contratoId']) ==  usuario[len("empleado_"):]:
-        return jsonify({"mensaje": f"El contrato {contrato_id} pertenece al usuario { contrato['userId']}"}), 200
-    else:
-        return jsonify({"error": "El contrato no pertenece al usuario especificado"}), 403
 
+        if not usuario.startswith("empleado_"):
+            abort(403, message="El usuario no es un empleado")
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5002)
+        print(contrato['contratoId'])
+        print(usuario[len("empleado_")])
+        if str(contrato['contratoId']) == usuario[len("empleado_"):]:
+            return {
+                "mensaje": f"El contrato {contrato_id} pertenece al usuario {contrato['userId']}"
+            }
+        else:
+            abort(403, message="El contrato no pertenece al usuario especificado")
+
+app = Flask(__name__)
+app.config['API_TITLE'] = 'AdminContrato API'
+app.config['API_VERSION'] = 'v1'
+app.config['JWT_ALGORITHM'] = 'ES256'
+app.config['JWT_PUBLIC_KEY'] = JWT_PUBLIC_KEY
+app.config['OPENAPI_VERSION'] = '3.1.0'
+app.config['OPENAPI_URL_PREFIX'] = '/'
+app.config['OPENAPI_SWAGGER_UI_PATH'] = '/swagger-ui'
+app.config['OPENAPI_SWAGGER_UI_URL'] = 'https://cdn.jsdelivr.net/npm/swagger-ui-dist/'
+
+jwt = JWTManager(app)
+
+api = AdminContratoApi(app)
+api.register_blueprint(blp)
