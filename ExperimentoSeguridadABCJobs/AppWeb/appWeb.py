@@ -87,8 +87,9 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
 
     # Realizar la operación con el token obtenido
     url = f'{baseUrl}/contrato/{user_data["contratoId"]}'
+    headers = {'Authorization': f'Bearer {user_token}'}
     data = {'token': user_token}
-    response = requests.put(url, json=data)
+    response = requests.put(url, headers=headers, json=data)
 
     # Escribir los datos de registro en el archivo CSV
     logging_data = {
@@ -108,7 +109,7 @@ def register_results() -> None:
     :return:
     """
     with open('appweb.csv', 'a+', newline='') as archivo_csv:
-        fieldnames = ['userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido']
+        fieldnames = ['ciclo', 'userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido']
         writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -133,7 +134,9 @@ def register_results() -> None:
                 user_token = faker.sha256()
                 # Realizar la operación con un código aleatorio en lugar del token
                 valid_token = False
-                logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token)
+                valid_contract = True
+                logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
+                                                     valid_contract)
                 writer.writerow(logging_data)
 
             elif caso == 'caso3':
