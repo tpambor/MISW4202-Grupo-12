@@ -5,7 +5,10 @@ import csv
 from faker import Faker
 import random
 
+# URL del API Gateway
 baseUrl = 'http://localhost:5000'
+
+# Listas de diccionarios con usuarios empleados y candidatos
 candidatos = [
     {'userId': 'candidato_1', 'contratoId': 1},
     {'userId': 'candidato_2', 'contratoId': 2},
@@ -19,6 +22,8 @@ empleados = [
     {'userId': 'empleado_4', 'contratoId': 4}
 ]
 faker = Faker()
+
+# Numero de peticiones a realizar
 num_ciclos = 1000000
 
 
@@ -98,6 +103,10 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
 
 
 def register_results() -> None:
+    """
+    Ejecuta el experimento y registra los resultados en un archivo CSV
+    :return:
+    """
     with open('appweb.csv', 'a+', newline='') as archivo_csv:
         fieldnames = ['userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido']
         writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
@@ -115,7 +124,8 @@ def register_results() -> None:
                     # Realizar la operación con el token obtenido
                     valid_token = True
                     valid_contract = True
-                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token, valid_contract)
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
+                                                         valid_contract)
                     writer.writerow(logging_data)
 
             elif caso == 'caso2':
@@ -133,7 +143,8 @@ def register_results() -> None:
                     # Realizar la operación con el token obtenido
                     valid_token = True
                     valid_contract = False
-                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token, valid_contract)
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
+                                                         valid_contract)
                     writer.writerow(logging_data)
 
             elif caso == 'caso4':
@@ -143,13 +154,10 @@ def register_results() -> None:
                     # Realizar la operación con el token obtenido
                     valid_token = False
                     valid_contract = True
-                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token, valid_contract)
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
+                                                         valid_contract)
                     writer.writerow(logging_data)
 
 
-def main():
-    pass
-
-
 if __name__ == '__main__':
-    main()
+    register_results()
