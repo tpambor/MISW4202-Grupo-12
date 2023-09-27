@@ -1,30 +1,57 @@
-from flask_restful import Resource, Api
 from flask import Flask, request
+from flask.views import MethodView
+from flask_smorest import Api, Blueprint, abort
+from marshmallow import Schema, fields
 import requests
 
+class ApiGateway(Api):
+    DEFAULT_ERROR_RESPONSE_NAME = None
 
-app = Flask(__name__)  
-app_context = app.app_context()
-app_context.push()
+class LoginSchema(Schema):
+    usuario = fields.String()
 
-api = Api(app)
+class LoginResponseSchema(Schema):
+    token = fields.String()
 
-class VistaLogin(Resource):
-    def post(self):
-        resLogin = requests.post("http://127.0.0.1:5001/login", json={'usuario': request.json["usuario"]})
-        return resLogin.json(), resLogin.status_code
-    
-class VistaContrato(Resource):
+blp = Blueprint("API Gateway", __name__)
+
+@blp.route("/login")
+class VistaLogin(MethodView):
+    @blp.arguments(LoginSchema())
+    @blp.response(200, LoginResponseSchema(), description="Iniciar sesión")
+    def post(self, login):
+        resLogin = requests.post("http://127.0.0.1:5001/login", json={'usuario': login['usuario']})
+        if resLogin.status_code == 200:
+            return {
+                'token': resLogin.json()['token']
+            }
+        else:
+            abort(resLogin.status_code, message=resLogin.json)
+
+@blp.route("/contrato/<int:id_contrato>")
+class VistaContrato(MethodView):
+    @blp.response(200)
     def put(self, id_contrato):
         auth_header = request.headers.get('Authorization', '')
         headers = {'Authorization': auth_header}
 
         resValidate = requests.get("http://127.0.0.1:5001/validate", headers=headers)
         if resValidate.status_code == 200:
-            resContrato = requests.put("http://127.0.0.1:5002/contrato/{}".format(id_contrato), headers=headers, json=request.json)
-            return resContrato.json(), resContrato.status_code
+            resContrato = requests.put(f"http://127.0.0.1:5002/contrato/{id_contrato}", headers=headers, json=request.json)
+            if resContrato.status_code == 200:
+                return resContrato.json()
+            else:
+                abort(resContrato.status_code, message=resContrato.json())
         else:
-            return resValidate.json(), resValidate.status_code
+            abort(resValidate.status_code, message=resValidate.json())
 
-api.add_resource(VistaLogin, "/login")
-api.add_resource(VistaContrato, "/contrato/<int:id_contrato>")
+app = Flask(__name__) 
+app.config['API_TITLE'] = 'API Gateway'
+app.config['API_VERSION'] = 'v1'
+app.config['OPENAPI_VERSION'] = '3.1.0'
+app.config['OPENAPI_URL_PREFIX'] = '/'
+app.config['OPENAPI_SWAGGER_UI_PATH'] = '/swagger-ui'
+app.config['OPENAPI_SWAGGER_UI_URL'] = 'https://cdn.jsdelivr.net/npm/swagger-ui-dist/' 
+
+api = ApiGateway(app)
+api.register_blueprint(blp)
