@@ -18,7 +18,6 @@ empleados = [
     {'userId': 'empleado_3', 'contratoId': 3},
     {'userId': 'empleado_4', 'contratoId': 4}
 ]
-user_token = None
 faker = Faker()
 num_ciclos = 1000000
 
@@ -53,16 +52,99 @@ def establish_scenario() -> str:
     return caso
 
 
+def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: str,
+                          valid_token: bool, valid_contract: bool) -> dict:
+    """
+    Realiza la solicitud de contrato
+    :param valid_contract: Indica si el contrato es el correcto o no
+    :param user_data: datos del usuario (empleado o candidato)
+    :param user_token: token de acceso
+    :param ciclo: ciclo actual
+    :param caso: caso de prueba
+    :param valid_token: indica si el token es válido o no
+    :return: diccionario con los datos de la solicitud
+    """
+    # Validar caso
+    if caso == 'caso1':
+        success = True
+    else:
+        success = False
+
+    # validar token
+    if valid_token:
+        token_valido = True
+    else:
+        token_valido = False
+
+    # Validar contrato
+    if not valid_contract:
+        user_data['contratoId'] = faker.random_int(min=5, max=10)
+
+    # Realizar la operación con el token obtenido
+    url = f'{baseUrl}/contrato/{user_data["contratoId"]}'
+    data = {'token': user_token}
+    response = requests.put(url, json=data)
+
+    # Escribir los datos de registro en el archivo CSV
+    logging_data = {
+        'ciclo': ciclo,
+        'userId': user_data['userId'],
+        'contratoId': user_data['contratoId'],
+        'intento_exitoso': success,
+        'operacion_exitosa': response.status_code == 200,
+        'token_valido': token_valido
+    }
+    return logging_data
+
+
 def register_results() -> None:
     with open('appweb.csv', 'a+', newline='') as archivo_csv:
         fieldnames = ['userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido']
         writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
         writer.writeheader()
+
         # Iniciar ciclos
         for ciclo in range(1, num_ciclos + 1):
             # Establecer el caso
             caso = establish_scenario()
-            # TODO: Implementar casos basado en los ejemplos anteriores
+
+            if caso == 'caso1':
+                user_data = random.choice(empleados)
+                user_token = make_login(user_data)
+                if user_token:
+                    # Realizar la operación con el token obtenido
+                    valid_token = True
+                    valid_contract = True
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token, valid_contract)
+                    writer.writerow(logging_data)
+
+            elif caso == 'caso2':
+                user_data = random.choice(empleados)
+                user_token = faker.sha256()
+                # Realizar la operación con un código aleatorio en lugar del token
+                valid_token = False
+                logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token)
+                writer.writerow(logging_data)
+
+            elif caso == 'caso3':
+                user_data = random.choice(empleados)
+                user_token = make_login(user_data)
+                if user_token:
+                    # Realizar la operación con el token obtenido
+                    valid_token = True
+                    valid_contract = False
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token, valid_contract)
+                    writer.writerow(logging_data)
+
+            elif caso == 'caso4':
+                user_data = random.choice(candidatos)
+                user_token = make_login(user_data)
+                if user_token:
+                    # Realizar la operación con el token obtenido
+                    valid_token = False
+                    valid_contract = True
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token, valid_contract)
+                    writer.writerow(logging_data)
 
 
 def main():
