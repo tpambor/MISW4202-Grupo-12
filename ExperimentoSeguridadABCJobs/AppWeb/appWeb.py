@@ -88,7 +88,7 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
     # Realizar la operación con el token obtenido
     url = f'{baseUrl}/contrato/{user_data["contratoId"]}'
     headers = {'Authorization': f'Bearer {user_token}'}
-    data = {'token': user_token}
+    data = {'terminos': 'ABC def Lorem ipsum'}
     response = requests.put(url, headers=headers, json=data)
 
     # Escribir los datos de registro en el archivo CSV
