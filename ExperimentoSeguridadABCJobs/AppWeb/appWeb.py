@@ -10,10 +10,10 @@ baseUrl = 'http://localhost:5000'
 
 # Listas de diccionarios con usuarios empleados y candidatos
 candidatos = [
-    {'userId': 'candidato_1', 'contratoId': 1},
-    {'userId': 'candidato_2', 'contratoId': 2},
-    {'userId': 'candidato_3', 'contratoId': 3},
-    {'userId': 'candidato_4', 'contratoId': 4}
+    {'userId': 'aspirante_1', 'contratoId': 1},
+    {'userId': 'aspirante_2', 'contratoId': 2},
+    {'userId': 'aspirante_3', 'contratoId': 3},
+    {'userId': 'aspirante_4', 'contratoId': 4}
 ]
 empleados = [
     {'userId': 'empleado_1', 'contratoId': 1},
