@@ -24,7 +24,7 @@ empleados = [
 faker = Faker()
 
 # Numero de peticiones a realizar
-num_ciclos = 1000000
+num_ciclos = 100
 
 
 def make_login(usuario: dict) -> str or None:
@@ -49,7 +49,7 @@ def establish_scenario() -> str:
     Caso 1: Operación exitosa - Token válido - Empleado con contrato valido
     Caso 2: Acceso denegado - Token inválido - Empleado con contrato valido
     Caso 3: Acceso denegado - Token válido - Empleado con contrato invalido
-    Caso 4: Acceso denegado - Token inválido - Candidato con contrato invalido
+    Caso 4: Acceso denegado - Token válido - Candidato con contrato invalido
     Establece el escenario de prueba
     :return: caso de prueba (String)
     """
@@ -69,6 +69,7 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
     :param valid_token: indica si el token es válido o no
     :return: diccionario con los datos de la solicitud
     """
+
     # Validar caso
     if caso == 'caso1':
         success = True
@@ -98,7 +99,8 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
         'contratoId': user_data['contratoId'],
         'intento_exitoso': success,
         'operacion_exitosa': response.status_code == 200,
-        'token_valido': token_valido
+        'token_valido': token_valido, 
+        'caso': caso
     }
     return logging_data
 
@@ -109,17 +111,17 @@ def register_results() -> None:
     :return:
     """
     with open('appweb.csv', 'a+', newline='') as archivo_csv:
-        fieldnames = ['ciclo', 'userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido']
+        fieldnames = ['ciclo', 'userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido', 'caso']
         writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
         writer.writeheader()
-
         # Iniciar ciclos
         for ciclo in range(1, num_ciclos + 1):
+            print(f'ciclo ', ciclo)
             # Establecer el caso
             caso = establish_scenario()
 
             if caso == 'caso1':
-                user_data = random.choice(empleados)
+                user_data = random.choice(empleados).copy()
                 user_token = make_login(user_data)
                 if user_token:
                     # Realizar la operación con el token obtenido
@@ -130,7 +132,7 @@ def register_results() -> None:
                     writer.writerow(logging_data)
 
             elif caso == 'caso2':
-                user_data = random.choice(empleados)
+                user_data = random.choice(empleados).copy()
                 user_token = faker.sha256()
                 # Realizar la operación con un código aleatorio en lugar del token
                 valid_token = False
@@ -140,7 +142,7 @@ def register_results() -> None:
                 writer.writerow(logging_data)
 
             elif caso == 'caso3':
-                user_data = random.choice(empleados)
+                user_data = random.choice(empleados).copy()
                 user_token = make_login(user_data)
                 if user_token:
                     # Realizar la operación con el token obtenido
@@ -151,12 +153,12 @@ def register_results() -> None:
                     writer.writerow(logging_data)
 
             elif caso == 'caso4':
-                user_data = random.choice(candidatos)
+                user_data = random.choice(candidatos).copy()
                 user_token = make_login(user_data)
                 if user_token:
                     # Realizar la operación con el token obtenido
-                    valid_token = False
-                    valid_contract = True
+                    valid_token = True
+                    valid_contract = False
                     logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                          valid_contract)
                     writer.writerow(logging_data)
