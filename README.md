@@ -45,5 +45,3 @@ Se estima que el experimento requerirá alrededor de 48 horas (12 horas/hombre) 
 - Correr celery -A tasks worker -l info -Q request  dentro de voting
 - Correr celery -A app  worker -l info -Q response  dentro de empresa_proyecto
 - Correr python3 app.py  dentro de empresa_proyecto
-
-- 
