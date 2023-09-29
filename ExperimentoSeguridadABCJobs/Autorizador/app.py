@@ -35,21 +35,34 @@ class VistaLogin(MethodView):
     @blp.arguments(LoginSchema())
     @blp.response(200, LoginResponseSchema(), description="Iniciar sesión")
     def post(self, login):
-        access_token = create_access_token(identity=login['usuario'])
+        additional_claims = dict()
+        # Authentication no es el punto de sensibilidad del experimento
+        # Vamos a asumir que cada usuario es valido y que los usuarios que empiezan con empleado_ pertecen al rol de empleado
+        if login['usuario'].startswith('empleado_'):
+            additional_claims['rol'] = 'empleado'
+        else:
+            additional_claims['rol'] = 'aspirante'
+
+        access_token = create_access_token(identity=login['usuario'], additional_claims=additional_claims)
         return {
             'token': access_token
         }
 
-@blp.route("/validate")
+@blp.route("/validate/contrato/editar")
 class VistaValidate(MethodView):
     @blp.response(200, None)
     def get(self):
         try:
             verify_jwt_in_request()
         except:
+            print("Token invalido", flush=True)
             abort(403, message="Token invalido")
 
         token = get_jwt()
+        # Verificar si el usuario es autorizado para editar un contrato
+        if token['rol'] != 'empleado':
+            print("Solo empleados pueden editar un contrato", flush=True)
+            abort(403, message="Solo empleados pueden editar un contrato")
 
 app = Flask(__name__)
 app.config['API_TITLE'] = 'Autorizador API'

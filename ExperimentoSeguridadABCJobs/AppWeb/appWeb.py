@@ -47,14 +47,15 @@ def make_login(usuario: dict) -> str or None:
 
 def establish_scenario() -> str:
     """
-    Caso 1: Operación exitosa - Token válido - Empleado con contrato valido
-    Caso 2: Acceso denegado - Token inválido - Empleado con contrato valido
-    Caso 3: Acceso denegado - Token válido - Empleado con contrato invalido
-    Caso 4: Acceso denegado - Token válido - Candidato con contrato invalido
+    Escenario 1: No ataque (Operación permitida) - Empleado de RRHH intenta editar el contrato que ha creado con token válido
+    Escenario 2: Ataque (Operación prohibida) - Empleado de RRHH intenta editar el contrato que ha creado pero sin token válido
+    Escenario 3: Ataque (Operación prohibida) - Empleado de RRHH intenta editar un contrato que fue creado por otro empleado (con token válido)
+    Escenario 4: Ataque (Operación prohibida) - Candidato intenta editar su contrato (con token válido)
+    Escenario 5: Ataque (Operación prohibida) - Candidato intenta editar contrato de otra persona (con token válido)
     Establece el escenario de prueba
     :return: caso de prueba (String)
     """
-    caso = random.choices(['caso1', 'caso2', 'caso3', 'caso4'], weights=[0.4, 0.2, 0.2, 0.2])[0]
+    caso = random.choices(['caso1', 'caso2', 'caso3', 'caso4', 'caso5'], weights=[0.2, 0.2, 0.2, 0.2, 0.2])[0]
     return caso
 
 
@@ -85,7 +86,9 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
 
     # Validar contrato
     if not valid_contract:
-        user_data['contratoId'] = random.randint(5, 10)
+        user_data['contratoId'] = user_data['contratoId'] + random.randint(1, 3)
+        if user_data['contratoId'] > 4:
+            user_data['contratoId'] = user_data['contratoId'] - 4
 
     # Realizar la operación con el token obtenido
     url = f'{baseUrl}/contrato/{user_data["contratoId"]}'
@@ -93,7 +96,7 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
     data = {'terminos': 'ABC def Lorem ipsum'}
     response = requests.put(url, headers=headers, json=data)
 
-    if response.status_code not in (200, 403, 404):
+    if response.status_code not in (200, 403):
         # hic sunt dracones
         print(response.json())
         exit(1)
@@ -174,6 +177,18 @@ def register_results() -> None:
                     # Realizar la operación con el token obtenido
                     valid_token = True
                     valid_contract = True
+                    logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
+                                                         valid_contract)
+                    writer.writerow(logging_data)
+                    unauthorized_errors += 1
+
+            elif caso == 'caso5':
+                user_data = random.choice(candidatos).copy()
+                user_token = make_login(user_data)
+                if user_token:
+                    # Realizar la operación con el token obtenido
+                    valid_token = True
+                    valid_contract = False
                     logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                          valid_contract)
                     writer.writerow(logging_data)

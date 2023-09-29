@@ -1,11 +1,15 @@
 import csv
+import sys
+
+print(sys.argv[1])
 
 caso_1 = []
 caso_2 = []
 caso_3 = []
 caso_4 = []
+caso_5 = []
 
-with open('evidencia/run1.csv', newline='') as csvfile:
+with open(sys.argv[1], newline='') as csvfile:
     data = csv.DictReader(csvfile)
     for row in data:
         if row['caso'] == 'caso1':
@@ -16,6 +20,8 @@ with open('evidencia/run1.csv', newline='') as csvfile:
             caso_3.append(row)
         elif row['caso'] == 'caso4':
             caso_4.append(row)
+        elif row['caso'] == 'caso5':
+            caso_5.append(row)
 
 print("######")
 print("Escenario 1: No ataque (Operación permitida) - Empleado de RRHH intenta editar el contrato que ha creado con token válido")
@@ -59,3 +65,14 @@ caso4_denegados = len([x for x in caso_4 if x['operacion_exitosa'] == 'False'])
 print(f"Intentos: {caso4_intentos}")
 print(f"  Acceso permitido: {caso4_permitidos}")
 print(f"  Acceso denegado: {caso4_denegados} (Ataques resistidas)")
+print("")
+
+print("######")
+print("Escenario 5: Ataque (Operación prohibida) - Candidato intenta editar contrato de otra persona (con token válido)")
+print("######")
+caso5_intentos = len(caso_5)
+caso5_permitidos = len([x for x in caso_5 if x['operacion_exitosa'] == 'True'])
+caso5_denegados = len([x for x in caso_5 if x['operacion_exitosa'] == 'False'])
+print(f"Intentos: {caso5_intentos}")
+print(f"  Acceso permitido: {caso5_permitidos}")
+print(f"  Acceso denegado: {caso5_denegados} (Ataques resistidas)")

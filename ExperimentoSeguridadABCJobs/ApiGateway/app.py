@@ -39,7 +39,7 @@ class VistaContrato(MethodView):
         auth_header = request.headers.get('Authorization', '')
         headers = {'Authorization': auth_header}
 
-        resValidate = requests.get(URL_AUTORIZADOR + "/validate", headers=headers)
+        resValidate = requests.get(URL_AUTORIZADOR + "/validate/contrato/editar", headers=headers)
         if resValidate.status_code == 200:
             resContrato = requests.put(f"{URL_ADMINCONTRATO}/contrato/{id_contrato}", headers=headers, json=request.json)
             if resContrato.status_code == 200:

@@ -37,25 +37,23 @@ class VistaContrato(MethodView):
     @blp.arguments(ContratoSchema())
     @blp.response(200)
     def put(self, nuevo_contrato, contrato_id):
-        contrato = next((c for c in contratos if c['contratoId'] == contrato_id), None)
+        contrato = {c['userId']:c for c in contratos if c['contratoId'] == contrato_id}
 
-        if contrato is None:
+        if len(contrato) == 0:
             abort(404, message='Contrato no encontrado')
 
         token = get_jwt()
         usuario = token['sub']
-        print("usuario:", usuario)
+        rol = token['rol']
 
-        if not usuario.startswith("empleado_"):
-            abort(403, message="El usuario no es un empleado")
-
-        print(contrato['contratoId'])
-        print(usuario[len("empleado_")])
-        if str(contrato['contratoId']) == usuario[len("empleado_"):]:
+        # Verificar si el contrato fue creado por el usuario
+        if usuario in contrato:
+            print(f"El contrato {contrato_id} del usuario {usuario} fue modificado", flush=True)
             return {
-                "mensaje": f"El contrato {contrato_id} pertenece al usuario {contrato['userId']}"
+                "mensaje": f"El contrato {contrato_id} del usuario {usuario} fue modificado"
             }
         else:
+            print(f"El contrato no pertenece al usuario especificado", flush=True)
             abort(403, message="El contrato no pertenece al usuario especificado")
 
 app = Flask(__name__)
