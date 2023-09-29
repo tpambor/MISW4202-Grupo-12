@@ -1,0 +1,35 @@
+evidencia/run5.csv
+######
+Escenario 1: No ataque (Operación permitida) - Empleado de RRHH intenta editar el contrato que ha creado con token válido
+######
+Intentos: 977
+  Acceso permitido: 977
+  Acceso denegado: 0
+
+######
+Escenario 2: Ataque (Operación prohibida) - Empleado de RRHH intenta editar el contrato que ha creado pero sin token válido
+######
+Intentos: 982
+  Acceso permitido: 0
+  Acceso denegado: 982 (Ataques resistidas)
+
+######
+Escenario 3: Ataque (Operación prohibida) - Empleado de RRHH intenta editar un contrato que fue creado por otro empleado (con token válido)
+######
+Intentos: 979
+  Acceso permitido: 0
+  Acceso denegado: 979 (Ataques resistidas)
+
+######
+Escenario 4: Ataque (Operación prohibida) - Candidato intenta editar su contrato (con token válido)
+######
+Intentos: 1048
+  Acceso permitido: 0
+  Acceso denegado: 1048 (Ataques resistidas)
+
+######
+Escenario 5: Ataque (Operación prohibida) - Candidato intenta editar contrato de otra persona (con token válido)
+######
+Intentos: 1014
+  Acceso permitido: 0
+  Acceso denegado: 1014 (Ataques resistidas)

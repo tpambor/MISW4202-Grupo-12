@@ -1,0 +1,20 @@
+services:
+  app_web:
+    build: AppWeb
+    environment:
+      - API=http://apigateway:5000
+      - LOGFILE=/logs/app_web.csv
+      - NUM_PETICIONES=5000
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /logs
+  autorizador:
+    build: Autorizador
+  admincontrato:
+    build: AdminContrato
+  apigateway:
+    build: ApiGateway
+    environment:
+      - AUTORIZADOR=http://autorizador:5000
+      - ADMINCONTRATO=http://admincontrato:5000

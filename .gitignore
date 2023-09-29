@@ -6,6 +6,8 @@ venv/
 env.bak/
 venv.bak/
 
+.DS_Store
+
 # Prettier
 .prettierrc.json
 
