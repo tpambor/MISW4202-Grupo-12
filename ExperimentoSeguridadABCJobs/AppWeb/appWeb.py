@@ -2,11 +2,16 @@ import requests
 import json
 import os
 import csv
-from faker import Faker
+from time import sleep
 import random
 
+LOGFILE = os.getenv('LOGFILE') or 'appweb.csv'
+
 # URL del API Gateway
-baseUrl = 'http://localhost:5000'
+baseUrl = os.getenv('API') or 'http://localhost:5000'
+
+# Numero de peticiones a realizar
+num_ciclos = int(os.getenv('NUM_PETICIONES') or 5000)
 
 # Listas de diccionarios con usuarios empleados y candidatos
 candidatos = [
@@ -21,10 +26,6 @@ empleados = [
     {'userId': 'empleado_3', 'contratoId': 3},
     {'userId': 'empleado_4', 'contratoId': 4}
 ]
-faker = Faker()
-
-# Numero de peticiones a realizar
-num_ciclos = 5000
 
 
 def make_login(usuario: dict) -> str or None:
@@ -41,7 +42,7 @@ def make_login(usuario: dict) -> str or None:
         return returned_token
     else:
         print('Error al hacer login')
-        return None
+        exit(1)
 
 
 def establish_scenario() -> str:
@@ -84,13 +85,18 @@ def make_contract_request(user_data: dict, user_token: str, ciclo: int, caso: st
 
     # Validar contrato
     if not valid_contract:
-        user_data['contratoId'] = faker.random_int(min=5, max=10)
+        user_data['contratoId'] = random.randint(5, 10)
 
     # Realizar la operación con el token obtenido
     url = f'{baseUrl}/contrato/{user_data["contratoId"]}'
     headers = {'Authorization': f'Bearer {user_token}'}
     data = {'terminos': 'ABC def Lorem ipsum'}
     response = requests.put(url, headers=headers, json=data)
+
+    if response.status_code not in (200, 403, 404):
+        # hic sunt dracones
+        print(response.json())
+        exit(1)
 
     # Escribir los datos de registro en el archivo CSV
     logging_data = {
@@ -115,15 +121,16 @@ def register_results() -> None:
     authorized_successes = 0  # Contador de éxitos de acceso autorizado
 
 
-    with open('appweb.csv', 'a+', newline='') as archivo_csv:
+    with open(LOGFILE, 'a+', newline='') as archivo_csv:
         fieldnames = ['ciclo', 'userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido', 'caso']
         writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
         writer.writeheader()
         # Iniciar ciclos
         for ciclo in range(1, num_ciclos + 1):
-            print(f'ciclo ', ciclo)
             # Establecer el caso
             caso = establish_scenario()
+
+            print(f'Ciclo {ciclo}, {caso}', flush=True)
 
             if caso == 'caso1':
                 user_data = random.choice(empleados).copy()
@@ -139,7 +146,7 @@ def register_results() -> None:
 
             elif caso == 'caso2':
                 user_data = random.choice(empleados).copy()
-                user_token = faker.sha256()
+                user_token = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY5NjAxMjg3NSwianRpIjoiMjhkYjRiYTAtNWViNS00NDU1LWFmZjYtZTM0NWI1MmYxZWExIiwidHlwZSI6ImFjY2VzbyIsInN1YiI6ImVtcGxlYWRvXzIiLCJuYmYiOjE2OTYwMTI4NzUsImV4cCI6MTY5NjAxMzc3NX0.sJrilMW29IefSe5sxVYEKKBi6vuTyVt_JJ1jebSeWQSKnaqSwXlYkwNxts-AVzb2hoDom61CnVlX6h0lZ9hSVw'
                 # Realizar la operación con un código aleatorio en lugar del token
                 valid_token = False
                 valid_contract = True
@@ -180,4 +187,5 @@ def register_results() -> None:
     print(f"Authorized Access Successes: {authorized_successes}")
 
 if __name__ == '__main__':
+    sleep(5)
     register_results()

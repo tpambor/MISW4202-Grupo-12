@@ -1,8 +1,15 @@
 from flask import Flask
 from flask.views import MethodView
-from flask_smorest import Api, Blueprint
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_smorest import Api, Blueprint, abort
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt, verify_jwt_in_request
 from marshmallow import Schema, fields
+
+JWT_PUBLIC_KEY = (
+    "-----BEGIN PUBLIC KEY-----\n"
+    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+nGNooPLSTnPcXHGwEp8Igz5cuCl\n"
+    "Wew8RPmYwxwqiAlAemdK8v0r3Z8IOWVq8289nlXXcN5OsLyoFxGo568XtQ==\n"
+    "-----END PUBLIC KEY-----"
+)
 
 JWT_PRIVATE_KEY = (
     "-----BEGIN EC PRIVATE KEY-----\n"
@@ -37,12 +44,18 @@ class VistaLogin(MethodView):
 class VistaValidate(MethodView):
     @blp.response(200, None)
     def get(self):
-        pass
+        try:
+            verify_jwt_in_request()
+        except:
+            abort(403, message="Token invalido")
+
+        token = get_jwt()
 
 app = Flask(__name__)
 app.config['API_TITLE'] = 'Autorizador API'
 app.config['API_VERSION'] = 'v1'
 app.config['JWT_ALGORITHM'] = 'ES256'
+app.config['JWT_PUBLIC_KEY'] = JWT_PUBLIC_KEY
 app.config['JWT_PRIVATE_KEY'] = JWT_PRIVATE_KEY
 app.config['OPENAPI_VERSION'] = '3.1.0'
 app.config['OPENAPI_URL_PREFIX'] = '/'

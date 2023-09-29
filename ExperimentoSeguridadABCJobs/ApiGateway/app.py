@@ -1,8 +1,12 @@
+import os
 from flask import Flask, request
 from flask.views import MethodView
 from flask_smorest import Api, Blueprint, abort
 from marshmallow import Schema, fields
 import requests
+
+URL_AUTORIZADOR = os.getenv('AUTORIZADOR') or 'http://localhost:5001'
+URL_ADMINCONTRATO = os.getenv('ADMINCONTRATO') or 'http://localhost:5002'
 
 class ApiGateway(Api):
     DEFAULT_ERROR_RESPONSE_NAME = None
@@ -20,7 +24,7 @@ class VistaLogin(MethodView):
     @blp.arguments(LoginSchema())
     @blp.response(200, LoginResponseSchema(), description="Iniciar sesión")
     def post(self, login):
-        resLogin = requests.post("http://127.0.0.1:5001/login", json={'usuario': login['usuario']})
+        resLogin = requests.post(URL_AUTORIZADOR + "/login", json={'usuario': login['usuario']})
         if resLogin.status_code == 200:
             return {
                 'token': resLogin.json()['token']
@@ -35,9 +39,9 @@ class VistaContrato(MethodView):
         auth_header = request.headers.get('Authorization', '')
         headers = {'Authorization': auth_header}
 
-        resValidate = requests.get("http://127.0.0.1:5001/validate", headers=headers)
+        resValidate = requests.get(URL_AUTORIZADOR + "/validate", headers=headers)
         if resValidate.status_code == 200:
-            resContrato = requests.put(f"http://127.0.0.1:5002/contrato/{id_contrato}", headers=headers, json=request.json)
+            resContrato = requests.put(f"{URL_ADMINCONTRATO}/contrato/{id_contrato}", headers=headers, json=request.json)
             if resContrato.status_code == 200:
                 return resContrato.json()
             else:
