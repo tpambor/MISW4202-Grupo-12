@@ -24,7 +24,7 @@ empleados = [
 faker = Faker()
 
 # Numero de peticiones a realizar
-num_ciclos = 100
+num_ciclos = 5000
 
 
 def make_login(usuario: dict) -> str or None:
@@ -158,7 +158,7 @@ def register_results() -> None:
                 if user_token:
                     # Realizar la operación con el token obtenido
                     valid_token = True
-                    valid_contract = False
+                    valid_contract = True
                     logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                          valid_contract)
                     writer.writerow(logging_data)
