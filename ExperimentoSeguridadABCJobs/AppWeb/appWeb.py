@@ -110,6 +110,11 @@ def register_results() -> None:
     Ejecuta el experimento y registra los resultados en un archivo CSV
     :return:
     """
+    
+    unauthorized_errors = 0  # Contador de errores de acceso no autorizado
+    authorized_successes = 0  # Contador de éxitos de acceso autorizado
+
+
     with open('appweb.csv', 'a+', newline='') as archivo_csv:
         fieldnames = ['ciclo', 'userId', 'contratoId', 'intento_exitoso', 'operacion_exitosa', 'token_valido', 'caso']
         writer = csv.DictWriter(archivo_csv, fieldnames=fieldnames)
@@ -130,6 +135,7 @@ def register_results() -> None:
                     logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                          valid_contract)
                     writer.writerow(logging_data)
+                    authorized_successes += 1
 
             elif caso == 'caso2':
                 user_data = random.choice(empleados).copy()
@@ -140,6 +146,7 @@ def register_results() -> None:
                 logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                      valid_contract)
                 writer.writerow(logging_data)
+                unauthorized_errors += 1
 
             elif caso == 'caso3':
                 user_data = random.choice(empleados).copy()
@@ -151,6 +158,7 @@ def register_results() -> None:
                     logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                          valid_contract)
                     writer.writerow(logging_data)
+                    unauthorized_errors += 1
 
             elif caso == 'caso4':
                 user_data = random.choice(candidatos).copy()
@@ -162,7 +170,14 @@ def register_results() -> None:
                     logging_data = make_contract_request(user_data, user_token, ciclo, caso, valid_token,
                                                          valid_contract)
                     writer.writerow(logging_data)
+                    unauthorized_errors += 1
 
+    with open('access_counts.txt', 'w') as counts_file:
+        counts_file.write(f"Unauthorized Access Errors: {unauthorized_errors}\n")
+        counts_file.write(f"Authorized Access Successes: {authorized_successes}\n")
+        
+    print(f"Unauthorized Access Errors: {unauthorized_errors}")
+    print(f"Authorized Access Successes: {authorized_successes}")
 
 if __name__ == '__main__':
     register_results()
