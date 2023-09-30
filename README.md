@@ -11,7 +11,7 @@
 
 [Video: Presentación del experimento](https://uniandes-my.sharepoint.com/:v:/g/personal/t_pambor_uniandes_edu_co/EWpLbfHMGX9KmgraP3S1Bh0BAPlQLoqeCBJSXkG-ocvKKw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0RpcmVjdCJ9fQ&e=EOoPh2)
 
-# Comandos para poder ejecutar el experimento:
+## Comandos para poder ejecutar el experimento:
 - Ejecutar el experimento
   - Instalar Docker y Docker Compose
   - Ejecuta `docker compose up --renew-anon-volumes --abort-on-container-exit --force-recreate` dentro de la carpeta ExperimentoABCJobs
@@ -40,9 +40,3 @@ Punto de sensibilidad que se desean probar: Uso de Cola de mensajes para la comu
 
 ## Esfuerzo estimado
 Se estima que el experimento requerirá alrededor de 48 horas (12 horas/hombre) con un sprint de una semana, para la configuración, desarrollo, pruebas y análisis de resultados. 
-
-# Comandos para poder ejecutar el proyecto:
-- Correr flask run dentro de motor_emparejamiento
-- Correr celery -A tasks worker -l info -Q request  dentro de voting
-- Correr celery -A app  worker -l info -Q response  dentro de empresa_proyecto
-- Correr python3 app.py  dentro de empresa_proyecto
